@@ -33,6 +33,9 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
     this.resizeColumnEnd = this.resizeColumnEnd.bind(this)
     this.resizeColumnMoving = this.resizeColumnMoving.bind(this)
 
+    
+    this.getMaxWidth = this.getMaxWidth.bind(this)
+
     this.state = {
       page: props.defaultPage,
       pageSize: props.defaultPageSize,
@@ -42,7 +45,22 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
       resized: props.defaultResized,
       currentlyResizing: false,
       skipNextSort: false,
+      columnWidths:{}
     }
+  }
+
+  getMaxWidth(currentColID){
+    var columnsCount = this.state.columns.length - 1;
+    var currentTotal = 0;
+    for(var id in this.state.columnWidths){
+      if(id!=currentColID){
+        currentTotal+=this.state.columnWidths[id];
+        columnsCount--;
+      }
+    }
+    currentTotal = currentTotal + columnsCount*100;
+
+    return this.state.currentlyResizing.tableWidth - currentTotal;
   }
 
   render () {
@@ -166,13 +184,17 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
     const canPrevious = page > 0
     const canNext = page + 1 < pages
 
-    const rowMinWidth = _.sum(
+    var rowMinWidth = _.sum(
       allVisibleColumns.map(d => {
         const resizedColumn = resized.find(x => x.id === d.id) || {}
         return _.getFirstDefined(resizedColumn.value, d.width, d.minWidth)
       })
     )
+    if(this.state.tableWidth && rowMinWidth>this.state.tableWidth)
+      rowMinWidth = this.state.tableWidth;
 
+      //console.log(this.state);
+      
     let rowIndex = -1
 
     const finalState = {

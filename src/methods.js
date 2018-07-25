@@ -581,9 +581,10 @@ export default Base =>
     }
 
     resizeColumnStart (event, column, isTouch) {
+      //console.log("====================resizeColumnStart====================");
       event.stopPropagation()
       const parentWidth = event.target.parentElement.getBoundingClientRect().width
-
+      const tableWidth = event.target.parentElement.parentElement.getBoundingClientRect().width
       let pageX
       if (isTouch) {
         pageX = event.changedTouches[0].pageX
@@ -598,7 +599,9 @@ export default Base =>
             id: column.id,
             startX: pageX,
             parentWidth,
+            tableWidth
           },
+          tableWidth: tableWidth
         },
         () => {
           if (isTouch) {
@@ -615,6 +618,8 @@ export default Base =>
     }
 
     resizeColumnMoving (event) {
+      // console.log("====================resizeColumnMoving====================");
+      // console.log(event);
       event.stopPropagation()
       const { onResizedChange } = this.props
       const { resized, currentlyResizing } = this.getResolvedState()
@@ -632,10 +637,22 @@ export default Base =>
 
       // Set the min size to 10 to account for margin and border or else the
       // group headers don't line up correctly
-      const newWidth = Math.max(
+      const newWidth =  Math.min(Math.max(
         currentlyResizing.parentWidth + pageX - currentlyResizing.startX,
         11
-      )
+      ),this.getMaxWidth(currentlyResizing.id));
+
+      // const newWidth = Math.min(
+      //   currentlyResizing.parentWidth + pageX - currentlyResizing.startX,
+      //   11
+      // )
+
+      this.state.columnWidths[currentlyResizing.id] = newWidth;
+
+      
+      // console.log(currentlyResizing.tableWidth);
+      // console.log(newWidth);
+      // console.log(this.state.columnWidths);
 
       newResized.push({
         id: currentlyResizing.id,
@@ -651,6 +668,7 @@ export default Base =>
     }
 
     resizeColumnEnd (event) {
+      //console.log("====================End====================");
       event.stopPropagation()
       const isTouch = event.type === 'touchend' || event.type === 'touchcancel'
 
