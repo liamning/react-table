@@ -50,17 +50,15 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
   }
 
   getMaxWidth(currentColID){
-    var columnsCount = this.state.columns.length - 1;
+    var columns = this.state.allVisibleColumns;
     var currentTotal = 0;
-    for(var id in this.state.columnWidths){
-      if(id!=currentColID){
-        currentTotal+=this.state.columnWidths[id];
-        columnsCount--;
-      }
-    }
-    currentTotal = currentTotal + columnsCount*100;
 
-    return this.state.currentlyResizing.tableWidth - currentTotal;
+    columns.forEach(col => {
+      if(col.id!=currentColID)
+      currentTotal += (col.width || this.state.columnWidths[col.id] || col.minWidth);
+    });
+
+    return this.state.tableWidth - currentTotal;
   }
 
   render () {
@@ -184,14 +182,19 @@ export default class ReactTable extends Methods(Lifecycle(Component)) {
     const canPrevious = page > 0
     const canNext = page + 1 < pages
 
-    var rowMinWidth = _.sum(
-      allVisibleColumns.map(d => {
-        const resizedColumn = resized.find(x => x.id === d.id) || {}
-        return _.getFirstDefined(resizedColumn.value, d.width, d.minWidth)
-      })
-    )
-    if(this.state.tableWidth && rowMinWidth>this.state.tableWidth)
-      rowMinWidth = this.state.tableWidth;
+    // var rowMinWidth = _.sum(
+    //   allVisibleColumns.map(d => {
+    //     const resizedColumn = resized.find(x => x.id === d.id) || {}
+    //     return _.getFirstDefined(resizedColumn.value, d.width, d.minWidth)
+    //   })
+    // )
+    
+    
+
+    var rowMinWidth = this.state.tableWidth;
+    console.log("(==================");
+    console.log(allVisibleColumns);
+    console.log(this.state.tableWidth);
 
       //console.log(this.state);
       

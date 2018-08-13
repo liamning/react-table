@@ -584,7 +584,7 @@ export default Base =>
       //console.log("====================resizeColumnStart====================");
       event.stopPropagation()
       const parentWidth = event.target.parentElement.getBoundingClientRect().width
-      const tableWidth = event.target.parentElement.parentElement.getBoundingClientRect().width
+      
       let pageX
       if (isTouch) {
         pageX = event.changedTouches[0].pageX
@@ -592,16 +592,18 @@ export default Base =>
         pageX = event.pageX
       }
 
+      //get the table width
+      this.state.tableWidth = event.target.parentElement.parentElement.getBoundingClientRect().width || this.state.tableWidth;
+      this.state.maxWidth = this.getMaxWidth(column.id);
+
       this.trapEvents = true
       this.setStateWithData(
         {
           currentlyResizing: {
             id: column.id,
             startX: pageX,
-            parentWidth,
-            tableWidth
-          },
-          tableWidth: tableWidth
+            parentWidth
+          }
         },
         () => {
           if (isTouch) {
@@ -640,7 +642,11 @@ export default Base =>
       const newWidth =  Math.min(Math.max(
         currentlyResizing.parentWidth + pageX - currentlyResizing.startX,
         11
-      ),this.getMaxWidth(currentlyResizing.id));
+      ), this.state.maxWidth);
+      // const newWidth =  Math.max(
+      //   currentlyResizing.parentWidth + pageX - currentlyResizing.startX,
+      //   11
+      // );
 
       // const newWidth = Math.min(
       //   currentlyResizing.parentWidth + pageX - currentlyResizing.startX,
@@ -652,7 +658,7 @@ export default Base =>
       
       // console.log(currentlyResizing.tableWidth);
       // console.log(newWidth);
-      // console.log(this.state.columnWidths);
+      console.log(this.state.columnWidths);
 
       newResized.push({
         id: currentlyResizing.id,
